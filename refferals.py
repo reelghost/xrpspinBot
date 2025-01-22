@@ -1,11 +1,8 @@
 import cloudscraper
-from fake_useragent import UserAgent
 from faker import Faker
 import random
 import os
-
-# Create a UserAgent instance
-ua = UserAgent()
+import argparse
 
 # Create a Faker instance
 fake = Faker()
@@ -17,9 +14,10 @@ domains = ["gmail.com", "yahoo.com", "yandex.com", "outlook.com"]
 email = f"{username}{random.randint(0,99)}@{random.choice(domains)}"
 phone = "25407" + ''.join([str(fake.random_int(0, 9)) for _ in range(6)])
 
-# Referral URL
-# ref_url = "https://e.vg/RNrYFmMjF?" #admin_real
-ref_url = "https://e.vg/mSAqgyXKY?" #saumumueni
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Process referral URL.')
+parser.add_argument('-r', '--refurl', type=str, required=True, help='Referral URL')
+args = parser.parse_args()
 
 # Registration payload
 register_payload = {
@@ -27,7 +25,7 @@ register_payload = {
     "fullname": fullname,
     "email": email,
     "phone": phone,
-    "a": "a",
+    "a": "b",
     "xrpAddr": "",
     "distTag": "",
     "password": "Matako",
@@ -35,14 +33,11 @@ register_payload = {
     "checkbox": "on"
 }
 
-# Create a cloudscraper instance
+# Create a cloudscraper instance with proxy
 scraper = cloudscraper.create_scraper()
-scraper.headers.update({'User-Agent': ua.random})
-ref_response = scraper.get(ref_url)
 
-# Check if the referral GET request was successful
-# clear the terminal
-os.system("cls")
+# Send the GET request to the referral URL
+ref_response = scraper.get(args.refurl)
 if ref_response.status_code == 200:
     print("Referral GET request successful")
     # Send the POST request to the registration URL using the same scraper session
@@ -52,3 +47,6 @@ if ref_response.status_code == 200:
 else:
     print("Referral GET request failed")
     print(ref_response.text)
+
+# running examlple
+# python refferals.py -r https://e.vg/RNrYFmMjF?

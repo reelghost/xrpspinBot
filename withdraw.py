@@ -8,12 +8,12 @@ def process_account(username, tag):
     ua = UserAgent()
     login_payload = {
         "username": username,
-        "password": "matako"
+        "password": "Matako"
     }
     withdraw_payload = {
         "confirm": 0,
         "payout_value": 0.000025,
-        "password": "Matako",
+        "password": "matako",
         "xrpAddr": "rHcXrn8joXL2Qe7BaMnhB5VRuj1XKEmUW6",
         "distTag": tag
     }
@@ -23,19 +23,18 @@ def process_account(username, tag):
     scraper.headers.update({'User-Agent': ua.random})
 
     try:
-        # Send the login POST request
         login_response = scraper.post("https://xrpspin.com/api.php?act=login", json=login_payload)
-
         if login_response.status_code == 200:
             print(f"Login successful for {username}")
-            # Update user agent for the withdrawal request
             withdraw_response = scraper.post("https://xrpspin.com/api.php?act=withdrawXrp", json=withdraw_payload)
-            print(f"{username}: {withdraw_response.json().get('parameters', 'None')}")
+            response_message = withdraw_response.json().get('parameters', 'None')[1]
+            print(f"{username}: {response_message}")
         else:
+            response_message = "Login failed"
             print(f"Login failed for {username}: {login_response.text}")
-
     except Exception as e:
         print(f"Error processing account {username}: {e}")
+    return response_message
 
 # Read accounts.csv and process each account
 def main():
@@ -52,13 +51,18 @@ def main():
                         process_account(username, tag)
                     else:
                         print(f"Invalid data in row: {row}")
-                    sleep(5)  # Wait 5 seconds between processing accounts
+                    sleep(1)  # Wait 5 seconds between processing accounts
 
         except FileNotFoundError:
             print("Error: accounts.csv not found.")
         except Exception as e:
             print(f"Error reading accounts.csv: {e}")
 
+        # if resp_msg == 'Incorrect destination tag':
+        #     sleep(1 + (1 * (1 if __import__('random').randint(0, 1) else 0)))
+        # elif resp_msg == 'Login failed':
+        #     sleep(1 + (1 * (1 if __import__('random').randint(0, 1) else 0)))
+        # else:
         print("Waiting for 5-6 minutes before next loop...")
         sleep(300 + (60 * (1 if __import__('random').randint(0, 1) else 0)))  # Wait 5-6 minutes
 
